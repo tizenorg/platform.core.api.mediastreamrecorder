@@ -635,7 +635,7 @@ int streamrecorder_set_recording_limit(streamrecorder_h recorder, streamrecorder
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
 	}
 
-	if (type == STREAMRECORDER_RECORDING_LIMIT_TYPE_TIME)
+	if (type == STREAMRECORDER_RECORDING_LIMIT_TYPE_SIZE)
 		ret = _streamrecorder_set_size_limit(recorder, limit);
 	else
 		ret = _streamrecorder_set_time_limit(recorder, limit);
@@ -650,7 +650,7 @@ int streamrecorder_get_recording_limit(streamrecorder_h recorder, streamrecorder
 		LOGE("NULL pointer handle");
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
 	}
-	if (type == STREAMRECORDER_RECORDING_LIMIT_TYPE_TIME)
+	if (type == STREAMRECORDER_RECORDING_LIMIT_TYPE_SIZE)
 		ret = _streamrecorder_get_size_limit(recorder, limit);
 	else
 		ret = _streamrecorder_get_time_limit(recorder, limit);
