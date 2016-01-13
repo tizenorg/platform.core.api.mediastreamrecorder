@@ -142,12 +142,12 @@ int streamrecorder_push_stream_buffer(streamrecorder_h recorder, media_packet_h 
 			}
 			video_buf->handle_num = tbm_surface_internal_get_num_bos(surface);
 			video_buf->type = MM_VIDEO_BUFFER_TYPE_TBM_BO;
-			video_buf->handle.paddr[0] = dataPtr;
+			//video_buf->handle.paddr[0] = dataPtr;
 			video_buf->data[0] =  dataPtr;
 			video_buf->width[0] = width;
 			video_buf->height[0] = height;
-			video_buf->stride_width[0] = video_buf->width[0];
-			video_buf->stride_height[0] = video_buf->height[0];
+			media_packet_get_video_stride_width(packet, 0, &video_buf->stride_width[0]);
+			media_packet_get_video_stride_width(packet, 0, &video_buf->stride_height[0]);
 			video_buf->size[0] = width*height*3/2;
 
 			ret = mm_streamrecorder_push_stream_buffer(handle->mm_handle, MM_STREAM_TYPE_VIDEO, pts, video_buf, video_buf->size[0]);
@@ -635,7 +635,7 @@ int streamrecorder_set_recording_limit(streamrecorder_h recorder, streamrecorder
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
 	}
 
-	if (type == STREAMRECORDER_RECORDING_LIMIT_TYPE_TIME)
+	if (type == STREAMRECORDER_RECORDING_LIMIT_TYPE_SIZE)
 		ret = _streamrecorder_set_size_limit(recorder, limit);
 	else
 		ret = _streamrecorder_set_time_limit(recorder, limit);
@@ -650,7 +650,7 @@ int streamrecorder_get_recording_limit(streamrecorder_h recorder, streamrecorder
 		LOGE("NULL pointer handle");
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
 	}
-	if (type == STREAMRECORDER_RECORDING_LIMIT_TYPE_TIME)
+	if (type == STREAMRECORDER_RECORDING_LIMIT_TYPE_SIZE)
 		ret = _streamrecorder_get_size_limit(recorder, limit);
 	else
 		ret = _streamrecorder_get_time_limit(recorder, limit);

@@ -230,12 +230,24 @@ int _streamrecorder_destroy(streamrecorder_h recorder)
 {
 	streamrecorder_s *handle = NULL;
 	int ret = MM_ERROR_NONE;
+	int state = MM_STREAMRECORDER_STATE_NONE;
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
 	}
 
 	handle = (streamrecorder_s *)recorder;
+
+	ret = streamrecorder_get_state(recorder, &state);
+	if (ret != MM_ERROR_NONE) {
+		LOGE("stramrecorder_unrealize fail");
+		return __convert_streamrecorder_error_code(__func__, ret);
+	}
+
+	if (state != MM_STREAMRECORDER_STATE_CREATED) {
+		LOGE("STREAMRECORDER_ERROR_INVALID_STATE (state:%d)", state);
+		return STREAMRECORDER_ERROR_INVALID_STATE;
+	}
 
 	ret = mm_streamrecorder_destroy(handle->mm_handle);
 
@@ -250,10 +262,20 @@ int _streamrecorder_prepare(streamrecorder_h recorder)
 {
 	int ret = MM_ERROR_NONE;
 	streamrecorder_s *handle = (streamrecorder_s *)recorder;
+	int state = MM_STREAMRECORDER_STATE_NONE;
 
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
+	}
+	ret = streamrecorder_get_state(recorder, &state);
+	if (ret != MM_ERROR_NONE) {
+		return __convert_streamrecorder_error_code(__func__, ret);
+	}
+
+	if (state != MM_STREAMRECORDER_STATE_CREATED) {
+		LOGE("STREAMRECORDER_ERROR_INVALID_STATE (state:%d)", state);
+		return STREAMRECORDER_ERROR_INVALID_STATE;
 	}
 
 	ret = mm_streamrecorder_realize(handle->mm_handle);
@@ -269,10 +291,21 @@ int _streamrecorder_unprepare(streamrecorder_h recorder)
 {
 	int ret = MM_ERROR_NONE;
 	streamrecorder_s *handle = (streamrecorder_s *)recorder;
+	int state = MM_STREAMRECORDER_STATE_NONE;
 
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
+	}
+
+	ret = streamrecorder_get_state(recorder, &state);
+	if (ret != MM_ERROR_NONE) {
+		return __convert_streamrecorder_error_code(__func__, ret);
+	}
+
+	if (state != MM_STREAMRECORDER_STATE_PREPARED) {
+		LOGE("STREAMRECORDER_ERROR_INVALID_STATE (state:%d)", state);
+		return STREAMRECORDER_ERROR_INVALID_STATE;
 	}
 
 	ret = mm_streamrecorder_unrealize(handle->mm_handle);
@@ -284,11 +317,23 @@ int _streamrecorder_unprepare(streamrecorder_h recorder)
 
 int _streamrecorder_start(streamrecorder_h recorder)
 {
+	int ret = MM_ERROR_NONE;
 	streamrecorder_s *handle = (streamrecorder_s *)recorder;
+	int state = MM_STREAMRECORDER_STATE_NONE;
 
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
+	}
+
+	ret = streamrecorder_get_state(recorder, &state);
+	if (ret != MM_ERROR_NONE) {
+		return __convert_streamrecorder_error_code(__func__, ret);
+	}
+
+	if (!(state == MM_STREAMRECORDER_STATE_PREPARED || state == MM_STREAMRECORDER_STATE_PAUSED)) {
+		LOGE("STREAMRECORDER_ERROR_INVALID_STATE (state:%d)", state);
+		return STREAMRECORDER_ERROR_INVALID_STATE;
 	}
 
 	return __convert_streamrecorder_error_code(__func__, mm_streamrecorder_record(handle->mm_handle));
@@ -296,23 +341,48 @@ int _streamrecorder_start(streamrecorder_h recorder)
 
 int _streamrecorder_pause(streamrecorder_h recorder)
 {
+	int ret = MM_ERROR_NONE;
 	streamrecorder_s *handle = (streamrecorder_s *)recorder;
+	int state = MM_STREAMRECORDER_STATE_NONE;
 
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
 	}
 
+	ret = streamrecorder_get_state(recorder, &state);
+	if (ret != MM_ERROR_NONE) {
+		return __convert_streamrecorder_error_code(__func__, ret);
+	}
+
+	if (state != MM_STREAMRECORDER_STATE_RECORDING) {
+		LOGE("STREAMRECORDER_ERROR_INVALID_STATE (state:%d)", state);
+		return STREAMRECORDER_ERROR_INVALID_STATE;
+	}
+
+
 	return __convert_streamrecorder_error_code(__func__, mm_streamrecorder_pause(handle->mm_handle));
 }
 
 int _streamrecorder_commit(streamrecorder_h recorder)
 {
+	int ret = MM_ERROR_NONE;
 	streamrecorder_s *handle = (streamrecorder_s *)recorder;
+	int state = MM_STREAMRECORDER_STATE_NONE;
 
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
+	}
+
+	ret = streamrecorder_get_state(recorder, &state);
+	if (ret != MM_ERROR_NONE) {
+		return __convert_streamrecorder_error_code(__func__, ret);
+	}
+
+	if (!(state == MM_STREAMRECORDER_STATE_RECORDING || state == MM_STREAMRECORDER_STATE_PAUSED)) {
+		LOGE("STREAMRECORDER_ERROR_INVALID_STATE (state:%d)", state);
+		return STREAMRECORDER_ERROR_INVALID_STATE;
 	}
 
 	return __convert_streamrecorder_error_code(__func__, mm_streamrecorder_commit(handle->mm_handle));
@@ -335,6 +405,11 @@ int _streamrecorder_set_video_framerate(streamrecorder_h recorder , int framerat
 	int ret = MM_ERROR_NONE;
 	streamrecorder_s *handle = (streamrecorder_s *)recorder;
 
+	if (recorder == NULL) {
+		LOGE("NULL pointer handle");
+		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
+	}
+
 	ret = mm_streamrecorder_set_attributes(handle->mm_handle, NULL,
 								MMSTR_VIDEO_FRAMERATE, framerate,
 								NULL);
@@ -347,6 +422,15 @@ int _streamrecorder_get_video_framerate(streamrecorder_h recorder, int *framerat
 {
 	int ret = MM_ERROR_NONE;
 	streamrecorder_s *handle = (streamrecorder_s *)recorder;
+
+	if (recorder == NULL) {
+		LOGE("NULL pointer handle");
+		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
+	}
+
+	if (framerate == NULL) {
+		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
+	}
 
 	ret = mm_streamrecorder_get_attributes(handle->mm_handle, NULL,
 								MMSTR_VIDEO_FRAMERATE, framerate,
@@ -372,6 +456,10 @@ int _streamrecorder_get_video_source_format(streamrecorder_h recorder, int *form
 	int ret = MM_ERROR_NONE;
 	streamrecorder_s *handle = (streamrecorder_s *)recorder;
 
+	if (format == NULL) {
+		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
+	}
+
 	ret = mm_streamrecorder_get_attributes(handle->mm_handle, NULL,
 								MMSTR_VIDEO_SOURCE_FORMAT, format,
 								NULL);
@@ -395,6 +483,9 @@ int _streamrecorder_set_video_resolution(streamrecorder_h recorder, int width, i
 		return STREAMRECORDER_ERROR_INVALID_STATE;
 	}
 
+	if (width == 0 || height == 0) {
+		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
+	}
 
 	ret = mm_streamrecorder_set_attributes(handle->mm_handle, NULL,
 								MMSTR_VIDEO_RESOLUTION_WIDTH, width,
@@ -526,6 +617,10 @@ int _streamrecorder_set_file_format(streamrecorder_h recorder, streamrecorder_fi
 				MM_FILE_FORMAT_AAC, /* STREAMRECORDER_FILE_FORMAT_ADTS */
 				MM_FILE_FORMAT_WAV, /* STREAMRECORDER_FILE_FORMAT_WAV */
 	};
+	if (recorder == NULL) {
+		LOGE("handle is NULL");
+		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
+	}
 
 	if (format < STREAMRECORDER_FILE_FORMAT_3GP || format > STREAMRECORDER_FILE_FORMAT_WAV) {
 		LOGE("invalid format %d", format);
@@ -643,6 +738,10 @@ int _streamrecorder_set_size_limit(streamrecorder_h recorder, int kbyte)
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
 	}
 
+	if (kbyte < 0) {
+		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
+	}
+
 	ret = mm_streamrecorder_set_attributes(handle->mm_handle, NULL,
 								MMSTR_TARGET_MAX_SIZE, kbyte,
 								NULL);
@@ -656,6 +755,10 @@ int _streamrecorder_set_time_limit(streamrecorder_h recorder, int second)
 
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
+		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
+	}
+
+	if (second < 0) {
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
 	}
 
@@ -759,6 +862,7 @@ int _streamrecorder_get_video_encoder(streamrecorder_h recorder, streamrecorder_
 {
 	int ret = MM_ERROR_NONE;
 	int mm_codec = 0;
+	int video_enable = 0;
 	streamrecorder_s *handle = (streamrecorder_s *)recorder;
 
 	if (handle == NULL) {
@@ -771,9 +875,10 @@ int _streamrecorder_get_video_encoder(streamrecorder_h recorder, streamrecorder_
 	}
 
 	ret = mm_streamrecorder_get_attributes(handle->mm_handle, NULL,
+								MMSTR_VIDEO_ENABLE, &video_enable,
 								MMSTR_VIDEO_ENCODER, &mm_codec,
 								NULL);
-	if (ret == MM_ERROR_NONE) {
+	if (ret == MM_ERROR_NONE && video_enable != 0) {
 		switch (mm_codec) {
 		case MM_VIDEO_CODEC_H263:
 			*codec = STREAMRECORDER_VIDEO_CODEC_H263;
@@ -785,6 +890,8 @@ int _streamrecorder_get_video_encoder(streamrecorder_h recorder, streamrecorder_
 			ret = MM_ERROR_STREAMRECORDER_INTERNAL;
 			break;
 		}
+	} else {
+		ret = MM_ERROR_STREAMRECORDER_INTERNAL;
 	}
 
 	return __convert_streamrecorder_error_code(__func__, ret);
@@ -804,7 +911,7 @@ int _streamrecorder_set_audio_samplerate(streamrecorder_h recorder, int samplera
 
 int _streamrecorder_set_audio_encoder_bitrate(streamrecorder_h recorder, int bitrate)
 {
-	if (bitrate < 1) {
+	if (bitrate <= 0) {
 		LOGE("invalid bitrate %d", bitrate);
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
 	}
@@ -823,9 +930,12 @@ int _streamrecorder_set_video_encoder_bitrate(streamrecorder_h recorder, int bit
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
 	}
 
-	ret = mm_streamrecorder_set_attributes(handle->mm_handle, NULL,
-								MMSTR_VIDEO_BITRATE, bitrate,
-								NULL);
+	if (bitrate < 0) {
+		LOGE("Invalid bitrate %d", bitrate);
+		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
+	}
+
+	ret = mm_streamrecorder_set_attributes(handle->mm_handle, NULL, MMSTR_VIDEO_BITRATE, bitrate, NULL);
 
 	return __convert_streamrecorder_error_code(__func__, ret);
 }
@@ -840,9 +950,12 @@ int _streamrecorder_get_size_limit(streamrecorder_h recorder, int *kbyte)
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
 	}
 
-	ret = mm_streamrecorder_get_attributes(handle->mm_handle, NULL,
-								MMSTR_TARGET_MAX_SIZE, kbyte,
-								NULL);
+	if (kbyte == NULL) {
+		LOGE("Size limit is NULL");
+		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
+	}
+
+	ret = mm_streamrecorder_get_attributes(handle->mm_handle, NULL, MMSTR_TARGET_MAX_SIZE, kbyte, NULL);
 
 	return __convert_streamrecorder_error_code(__func__, ret);
 }
@@ -857,9 +970,12 @@ int _streamrecorder_get_time_limit(streamrecorder_h recorder, int *second)
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
 	}
 
-	ret = mm_streamrecorder_get_attributes(handle->mm_handle, NULL,
-								MMSTR_TARGET_TIME_LIMIT, second,
-								NULL);
+	if (second == NULL) {
+		LOGE("Time limit is NULL");
+		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
+	}
+
+	ret = mm_streamrecorder_get_attributes(handle->mm_handle, NULL, MMSTR_TARGET_TIME_LIMIT, second, NULL);
 
 	return __convert_streamrecorder_error_code(__func__, ret);
 }
@@ -872,6 +988,11 @@ int _streamrecorder_get_audio_samplerate(streamrecorder_h recorder, int *sampler
 
 	if (recorder == NULL) {
 		LOGE("handle is NULL");
+		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
+	}
+
+	if (samplerate == NULL) {
+		LOGE("samplerate is NULL");
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
 	}
 
@@ -892,6 +1013,11 @@ int _streamrecorder_get_audio_encoder_bitrate(streamrecorder_h recorder, int *bi
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
 	}
 
+	if (bitrate == NULL) {
+		LOGE("bitrate is NULL");
+		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
+	}
+
 	ret = mm_streamrecorder_get_attributes(handle->mm_handle, NULL,
 								MMSTR_AUDIO_BITRATE, bitrate,
 								NULL);
@@ -906,6 +1032,10 @@ int _streamrecorder_get_video_encoder_bitrate(streamrecorder_h recorder, int *bi
 
 	if (handle == NULL) {
 		LOGE("handle is NULL");
+		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
+	}
+
+	if (bitrate == NULL) {
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
 	}
 	ret = mm_streamrecorder_get_attributes(handle->mm_handle, NULL,
