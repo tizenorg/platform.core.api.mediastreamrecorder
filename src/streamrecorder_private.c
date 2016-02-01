@@ -252,6 +252,7 @@ int _streamrecorder_destroy(streamrecorder_h recorder)
 	ret = mm_streamrecorder_destroy(handle->mm_handle);
 
 	if (ret == MM_ERROR_NONE) {
+		free(handle->pkt);
 		free(handle);
 	}
 

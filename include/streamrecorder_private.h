@@ -27,6 +27,8 @@
 extern "C" {
 #endif
 
+#define MAX_MPACKET_DATA 20
+
 typedef enum {
 	_STREAMRECORDER_EVENT_TYPE_NOTIFY,
 	_STREAMRECORDER_EVENT_TYPE_RECORDING_LIMITED,
@@ -37,9 +39,16 @@ typedef enum {
 }_streamrecorder_event_e;
 
 typedef struct {
+	media_packet_h packet[MAX_MPACKET_DATA];
+	void *consumed_buf[MAX_MPACKET_DATA];
+	bool is_video[MAX_MPACKET_DATA];
+}streamrecorder_mediapacket;
+
+typedef struct {
 	MMHandleType mm_handle;
 	void* user_cb[_STREAMRECORDER_EVENT_TYPE_NUM];
 	void* user_data[_STREAMRECORDER_EVENT_TYPE_NUM];
+	streamrecorder_mediapacket *pkt;
 	unsigned int state;
 	_streamrecorder_event_e type;
 	double last_max_input_level;

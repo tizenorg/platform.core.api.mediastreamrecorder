@@ -53,6 +53,9 @@ int streamrecorder_create(streamrecorder_h *recorder)
 
 	memset(handle, 0 , sizeof(streamrecorder_s));
 
+	handle->pkt = (streamrecorder_mediapacket *)malloc(sizeof(streamrecorder_mediapacket));
+	memset(handle->pkt, 0, sizeof(streamrecorder_mediapacket));
+
 	ret = mm_streamrecorder_create(&handle->mm_handle);
 	if (ret != MM_ERROR_NONE) {
 		free(handle);
@@ -107,12 +110,16 @@ int streamrecorder_push_stream_buffer(streamrecorder_h recorder, media_packet_h 
 	tbm_surface_h surface = NULL;
 	int width;
 	int height;
+	int i = 0;
+	bool is_full = FALSE;
+	streamrecorder_mediapacket *pkt = NULL;
 
 	if ((recorder == NULL) || (packet == NULL)) {
 		LOGE("[%s] INVALID_PARAMETER(0x%08x)", __func__, STREAMRECORDER_ERROR_INVALID_PARAMETER);
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
 	}
 	streamrecorder_s *handle = (streamrecorder_s *)recorder;
+	pkt = handle->pkt;
 
 	/* pts */
 	media_packet_get_pts(packet, &pts);
@@ -150,8 +157,21 @@ int streamrecorder_push_stream_buffer(streamrecorder_h recorder, media_packet_h 
 			media_packet_get_video_stride_width(packet, 0, &video_buf->stride_height[0]);
 			video_buf->size[0] = width*height*3/2;
 
+			for (i = 0; i < MAX_MPACKET_DATA; i++) {
+				if (pkt->packet[i] == NULL) {
+					pkt->packet[i] = packet;
+					pkt->consumed_buf[i] = video_buf;
+					pkt->is_video[i] = TRUE;
+					break;
+				} else {
+					if (i == MAX_MPACKET_DATA -1) {
+						free(video_buf);
+						return STREAMRECORDER_ERROR_OUT_OF_MEMORY;
+					}
+				}
+			}
+
 			ret = mm_streamrecorder_push_stream_buffer(handle->mm_handle, MM_STREAM_TYPE_VIDEO, pts, video_buf, video_buf->size[0]);
-			free(video_buf);
 		} else if (mimetype == MEDIA_FORMAT_I420) {
 			void *buf_data = NULL;
 			uint64_t buf_size = 0;
@@ -172,6 +192,18 @@ int streamrecorder_push_stream_buffer(streamrecorder_h recorder, media_packet_h 
 		if (flag) {
 			void *buf_data = NULL;
 			uint64_t buf_size = 0;
+
+			for (i = 0; i < MAX_MPACKET_DATA; i++) {
+				if (pkt->packet[i] == NULL) {
+					pkt->packet[i] = packet;
+					pkt->consumed_buf[i] = buf_data;
+					break;
+				} else {
+					if (i == MAX_MPACKET_DATA -1) {
+						return STREAMRECORDER_ERROR_OUT_OF_MEMORY;
+					}
+				}
+			}
 			ret = media_packet_get_buffer_size(packet, &buf_size);
 			if (ret != MEDIA_PACKET_ERROR_NONE) {
 				LOGW("buffer size get fail");
@@ -916,7 +948,27 @@ static int __mm_streamrecorder_msg_cb(int message, void *param, void *user_data)
 	}	break;
 	case MM_MESSAGE_STREAMRECORDER_CONSUME_COMPLETE:
 	{
-		void *consume = (m->consumed_mediabuffer).consumed_buffer;
+		void *consume_data = (m->consumed_mediabuffer).consumed_buffer;
+		void *consume = NULL;
+		streamrecorder_mediapacket *pkt;
+		bool flag = FALSE;
+		int i = 0;
+
+		if (consume_data == NULL)
+			break;
+
+		pkt = handle->pkt;
+
+		for (i = 0; i< MAX_MPACKET_DATA; i++) {
+			if (pkt->consumed_buf[i] == consume_data) {
+				consume = pkt->packet[i];
+				if (pkt->is_video[i] == TRUE) {
+					free(pkt->consumed_buf[i]);		// MMVideoBuffer free
+					pkt->consumed_buf[i] = NULL;
+				}
+			}
+		}
+
 		if (handle->user_cb[_STREAMRECORDER_EVENT_TYPE_CONSUME_COMPLETE]) {
 			((streamrecorder_consume_completed_cb)handle->user_cb[_STREAMRECORDER_EVENT_TYPE_CONSUME_COMPLETE])(consume, handle->user_data[_STREAMRECORDER_EVENT_TYPE_CONSUME_COMPLETE]);
 		}
