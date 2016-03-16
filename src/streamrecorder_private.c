@@ -771,7 +771,6 @@ int _streamrecorder_set_time_limit(streamrecorder_h recorder, int second)
 
 int _streamrecorder_set_audio_encoder(streamrecorder_h recorder, streamrecorder_audio_codec_e codec)
 {
-	streamrecorder_s *handle = (streamrecorder_s *)recorder;
 	int audio_table[3] = { MM_AUDIO_CODEC_AMR,      /* STREAMRECORDER_AUDIO_CODEC_AMR */
 				   MM_AUDIO_CODEC_AAC,      /* STREAMRECORDER_AUDIO_CODEC_AAC */
 				   MM_AUDIO_CODEC_WAVE      /* STREAMRECORDER_AUDIO_CODEC_PCM */

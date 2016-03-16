@@ -111,7 +111,6 @@ int streamrecorder_push_stream_buffer(streamrecorder_h recorder, media_packet_h 
 	int width;
 	int height;
 	int i = 0;
-	bool is_full = FALSE;
 	streamrecorder_mediapacket *pkt = NULL;
 
 	if ((recorder == NULL) || (packet == NULL)) {
@@ -953,7 +952,6 @@ static int __mm_streamrecorder_msg_cb(int message, void *param, void *user_data)
 		void *consume_data = (m->consumed_mediabuffer).consumed_buffer;
 		void *consume = NULL;
 		streamrecorder_mediapacket *pkt;
-		bool flag = FALSE;
 		int i = 0;
 
 		if (consume_data == NULL)

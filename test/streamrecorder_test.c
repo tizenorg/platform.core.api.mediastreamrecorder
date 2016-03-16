@@ -178,7 +178,7 @@ static gboolean mode_change();
 
 void _recording_status_cb(unsigned long long elapsed_time, unsigned long long file_size, void *user_data)
 {
-	printf("elapsed time :%d, file_size :%d\n", elapsed_time, file_size);
+	printf("elapsed time :%lld, file_size :%lld\n", elapsed_time, file_size);
 }
 
 void _recording_limit_reached_cb(streamrecorder_recording_limit_type_e type, void *user_data)
@@ -230,8 +230,6 @@ media_packet_h streamrecorder_make_media_packet(int video, void *data, int size)
 		g_print("media_format_create failed\n");
 		return NULL;
 	}
-	int i;
-	int bo_num = 0;
 
 	if (video) {
 		if (hmstreamrecorder->mode == MODE_LIVE_BUFFER_NV12_VIDEO_SW) {
@@ -275,10 +273,6 @@ void feed_video_es(GstElement *element, GstBuffer *buffer, GstPad *pad, gpointer
 	GstMemory *mem;
 	GstMapInfo map = GST_MAP_INFO_INIT;
 	media_packet_h out_pkt = NULL;
-	static GstBuffer *buf = NULL;
-	MMVideoBuffer *m_buf;
-
-	MMHandleType handle = (MMHandleType)data;
 
 	gst_buffer_ref(buffer);
 
@@ -316,7 +310,7 @@ void close_pipeline(void)
 int __feed_buffer_test(MMHandleType handle, int mode)
 {
 
-	GstCaps *caps;
+	GstCaps *caps = NULL;
 	g_print("creating __feed_buffer_test pipeline\n");
 	if (!handle)
 		return FALSE;
@@ -433,9 +427,6 @@ int __feed_buffer_test(MMHandleType handle, int mode)
 static void main_menu(gchar buf)
 {
 	int err = 0;
-	int current_fps = 0;
-	int average_fps = 0;
-	char *err_attr_name = NULL;
 
 	if (hmstreamrecorder->mode == MODE_LIVE_BUFFER_I420_VIDEO || hmstreamrecorder->mode == MODE_LIVE_BUFFER_NV12_VIDEO_SW) {
 	    if (recorder_state == STREAMRECORDER_STATE_NONE) {
@@ -576,10 +567,7 @@ static gboolean cmd_input(GIOChannel *channel)
 static gboolean init(int type)
 {
 	int err;
-	int size;
-	int support_zero_copy_format = 0;
 	int ischeck = 0;
-	char *err_attr_name = NULL;
 
 	if (!hmstreamrecorder)
 	    return FALSE;
@@ -666,11 +654,7 @@ static gboolean mode_change()
 {
 	int err = STREAMRECORDER_ERROR_NONE;
 	int state = STREAMRECORDER_STATE_NONE;
-	int name_size = 0;
-	int device_count = 0;
-	int facing_direction = 0;
 	char media_type = '\0';
-	char *evassink_name = NULL;
 	bool check = FALSE;
 
 	err = streamrecorder_get_state(hmstreamrecorder->recorder, (streamrecorder_state_e *)&state);
