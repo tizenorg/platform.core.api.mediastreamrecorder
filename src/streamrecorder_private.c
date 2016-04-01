@@ -230,7 +230,7 @@ int _streamrecorder_destroy(streamrecorder_h recorder)
 {
 	streamrecorder_s *handle = NULL;
 	int ret = MM_ERROR_NONE;
-	int state = MM_STREAMRECORDER_STATE_NONE;
+	streamrecorder_state_e state = MM_STREAMRECORDER_STATE_NONE;
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return STREAMRECORDER_ERROR_INVALID_PARAMETER;
@@ -244,7 +244,7 @@ int _streamrecorder_destroy(streamrecorder_h recorder)
 		return __convert_streamrecorder_error_code(__func__, ret);
 	}
 
-	if (state != MM_STREAMRECORDER_STATE_CREATED) {
+	if (state != STREAMRECORDER_STATE_CREATED) {
 		LOGE("STREAMRECORDER_ERROR_INVALID_STATE (state:%d)", state);
 		return STREAMRECORDER_ERROR_INVALID_STATE;
 	}
@@ -263,7 +263,7 @@ int _streamrecorder_prepare(streamrecorder_h recorder)
 {
 	int ret = MM_ERROR_NONE;
 	streamrecorder_s *handle = (streamrecorder_s *)recorder;
-	int state = MM_STREAMRECORDER_STATE_NONE;
+	streamrecorder_state_e state = MM_STREAMRECORDER_STATE_NONE;
 
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
@@ -274,7 +274,7 @@ int _streamrecorder_prepare(streamrecorder_h recorder)
 		return __convert_streamrecorder_error_code(__func__, ret);
 	}
 
-	if (state != MM_STREAMRECORDER_STATE_CREATED) {
+	if (state != STREAMRECORDER_STATE_CREATED) {
 		LOGE("STREAMRECORDER_ERROR_INVALID_STATE (state:%d)", state);
 		return STREAMRECORDER_ERROR_INVALID_STATE;
 	}
@@ -292,7 +292,7 @@ int _streamrecorder_unprepare(streamrecorder_h recorder)
 {
 	int ret = MM_ERROR_NONE;
 	streamrecorder_s *handle = (streamrecorder_s *)recorder;
-	int state = MM_STREAMRECORDER_STATE_NONE;
+	streamrecorder_state_e state = MM_STREAMRECORDER_STATE_NONE;
 
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
@@ -304,7 +304,7 @@ int _streamrecorder_unprepare(streamrecorder_h recorder)
 		return __convert_streamrecorder_error_code(__func__, ret);
 	}
 
-	if (state != MM_STREAMRECORDER_STATE_PREPARED) {
+	if (state != STREAMRECORDER_STATE_CREATED) {
 		LOGE("STREAMRECORDER_ERROR_INVALID_STATE (state:%d)", state);
 		return STREAMRECORDER_ERROR_INVALID_STATE;
 	}
@@ -320,7 +320,7 @@ int _streamrecorder_start(streamrecorder_h recorder)
 {
 	int ret = MM_ERROR_NONE;
 	streamrecorder_s *handle = (streamrecorder_s *)recorder;
-	int state = MM_STREAMRECORDER_STATE_NONE;
+	streamrecorder_state_e state = MM_STREAMRECORDER_STATE_NONE;
 
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
@@ -332,7 +332,7 @@ int _streamrecorder_start(streamrecorder_h recorder)
 		return __convert_streamrecorder_error_code(__func__, ret);
 	}
 
-	if (!(state == MM_STREAMRECORDER_STATE_PREPARED || state == MM_STREAMRECORDER_STATE_PAUSED)) {
+	if (!(state == STREAMRECORDER_STATE_PREPARED || state == STREAMRECORDER_STATE_PAUSED)) {
 		LOGE("STREAMRECORDER_ERROR_INVALID_STATE (state:%d)", state);
 		return STREAMRECORDER_ERROR_INVALID_STATE;
 	}
@@ -344,7 +344,7 @@ int _streamrecorder_pause(streamrecorder_h recorder)
 {
 	int ret = MM_ERROR_NONE;
 	streamrecorder_s *handle = (streamrecorder_s *)recorder;
-	int state = MM_STREAMRECORDER_STATE_NONE;
+	streamrecorder_state_e state = MM_STREAMRECORDER_STATE_NONE;
 
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
@@ -356,7 +356,7 @@ int _streamrecorder_pause(streamrecorder_h recorder)
 		return __convert_streamrecorder_error_code(__func__, ret);
 	}
 
-	if (state != MM_STREAMRECORDER_STATE_RECORDING) {
+	if (state != STREAMRECORDER_STATE_RECORDING) {
 		LOGE("STREAMRECORDER_ERROR_INVALID_STATE (state:%d)", state);
 		return STREAMRECORDER_ERROR_INVALID_STATE;
 	}
@@ -369,7 +369,7 @@ int _streamrecorder_commit(streamrecorder_h recorder)
 {
 	int ret = MM_ERROR_NONE;
 	streamrecorder_s *handle = (streamrecorder_s *)recorder;
-	int state = MM_STREAMRECORDER_STATE_NONE;
+	streamrecorder_state_e state = MM_STREAMRECORDER_STATE_NONE;
 
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
@@ -381,7 +381,7 @@ int _streamrecorder_commit(streamrecorder_h recorder)
 		return __convert_streamrecorder_error_code(__func__, ret);
 	}
 
-	if (!(state == MM_STREAMRECORDER_STATE_RECORDING || state == MM_STREAMRECORDER_STATE_PAUSED)) {
+	if (!(state == STREAMRECORDER_STATE_RECORDING || state == STREAMRECORDER_STATE_PAUSED)) {
 		LOGE("STREAMRECORDER_ERROR_INVALID_STATE (state:%d)", state);
 		return STREAMRECORDER_ERROR_INVALID_STATE;
 	}
