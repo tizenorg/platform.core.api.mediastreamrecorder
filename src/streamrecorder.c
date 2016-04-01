@@ -959,7 +959,7 @@ static int __mm_streamrecorder_msg_cb(int message, void *param, void *user_data)
 
 		pkt = handle->pkt;
 
-		for (i = 0; i< MAX_MPACKET_DATA; i++) {
+		for (i = 0; i < MAX_MPACKET_DATA; i++) {
 			if (pkt->consumed_buf[i] == consume_data) {
 				consume = pkt->packet[i];
 				if (pkt->is_video[i] == TRUE) {

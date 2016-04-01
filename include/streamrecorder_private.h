@@ -36,13 +36,13 @@ typedef enum {
 	_STREAMRECORDER_EVENT_TYPE_ERROR,
 	_STREAMRECORDER_EVENT_TYPE_CONSUME_COMPLETE,
 	_STREAMRECORDER_EVENT_TYPE_NUM
-}_streamrecorder_event_e;
+} _streamrecorder_event_e;
 
 typedef struct {
 	media_packet_h packet[MAX_MPACKET_DATA];
 	void *consumed_buf[MAX_MPACKET_DATA];
 	bool is_video[MAX_MPACKET_DATA];
-}streamrecorder_mediapacket;
+} streamrecorder_mediapacket;
 
 typedef struct {
 	MMHandleType mm_handle;
@@ -52,7 +52,7 @@ typedef struct {
 	unsigned int state;
 	_streamrecorder_event_e type;
 	double last_max_input_level;
-}streamrecorder_s;
+} streamrecorder_s;
 
 int __convert_streamrecorder_error_code(const char *func, int code);
 int _streamrecorder_set_videosource_buffer(streamrecorder_h recorder);
@@ -71,7 +71,7 @@ int _streamrecorder_set_video_source_format(streamrecorder_h recorder, int forma
 int _streamrecorder_get_video_source_format(streamrecorder_h recorder, int *format);
 int _streamrecorder_set_video_resolution(streamrecorder_h recorder, int width, int height);
 int _streamrecorder_get_video_resolution(streamrecorder_h recorder, int *width, int *height);
-int _streamrecorder_foreach_supported_video_resolution(streamrecorder_h recorder,streamrecorder_supported_video_resolution_cb foreach_cb, void *user_data);
+int _streamrecorder_foreach_supported_video_resolution(streamrecorder_h recorder, streamrecorder_supported_video_resolution_cb foreach_cb, void *user_data);
 int _streamrecorder_set_filename(streamrecorder_h recorder,  const char *filename);
 int _streamrecorder_get_filename(streamrecorder_h recorder,  char **filename);
 int _streamrecorder_set_file_format(streamrecorder_h recorder, streamrecorder_file_format_e format);
