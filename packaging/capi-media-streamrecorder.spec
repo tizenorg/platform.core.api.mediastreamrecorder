@@ -1,6 +1,6 @@
 Name:       capi-media-streamrecorder
 Summary:    A Streamrecorder library in Tizen Native API
-Version:    0.0.5
+Version:    0.0.6
 Release:    0
 Group:      Multimedia/Other
 License:    Apache-2.0

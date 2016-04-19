@@ -304,7 +304,7 @@ int _streamrecorder_unprepare(streamrecorder_h recorder)
 		return __convert_streamrecorder_error_code(__func__, ret);
 	}
 
-	if (state != STREAMRECORDER_STATE_CREATED) {
+	if (state != STREAMRECORDER_STATE_PREPARED) {
 		LOGE("STREAMRECORDER_ERROR_INVALID_STATE (state:%d)", state);
 		return STREAMRECORDER_ERROR_INVALID_STATE;
 	}
